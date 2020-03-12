@@ -90,7 +90,8 @@ RUN ompi_info --parsable --all | grep mpi_built_with_cuda_support:value \
     typing==3.6.4 \
     future==0.17.1 \
     "pyopenssl>=17.5.0" \
- && conda install -c dglteam -y dgl-cuda10.1==0.4.1 \
+ && conda install -c dglteam -y dgl-cuda10.1==0.4.2 \
+ && conda install -c conda-forge rdkit \
  && /opt/conda/bin/conda clean -ya
 
 RUN conda install -c pytorch magma-cuda101==2.5.1 \
@@ -107,8 +108,8 @@ RUN conda install -c pytorch magma-cuda101==2.5.1 \
 WORKDIR /opt/pytorch
 
 # Copy workaround script for incorrect hostname
-COPY changehostname.c /
-COPY start_with_right_hostname.sh /usr/local/bin/start_with_right_hostname.sh
+# COPY changehostname.c /
+# COPY start_with_right_hostname.sh /usr/local/bin/start_with_right_hostname.sh
 
 WORKDIR /root
 
@@ -153,15 +154,18 @@ RUN apt-get install -y --no-install-recommends openssh-client openssh-server \
 
 WORKDIR /
 
-COPY sagemaker_pytorch_training.tar.gz /sagemaker_pytorch_training.tar.gz
+#COPY sagemaker_pytorch_training.tar.gz /sagemaker_pytorch_training.tar.gz
+COPY sagemaker_pytorch_training-1.2.4.dev0-py2.py3-none-any.whl /sagemaker_pytorch_training-1.2.4.dev0-py2.py3-none-any.whl
 
-RUN pip install --no-cache-dir /sagemaker_pytorch_training.tar.gz \
- && rm /sagemaker_pytorch_training.tar.gz
+RUN pip install --no-cache-dir /sagemaker_pytorch_training-1.2.4.dev0-py2.py3-none-any.whl \
+  && rm /sagemaker_pytorch_training-1.2.4.dev0-py2.py3-none-any.whl
+#RUN pip install --no-cache-dir /sagemaker_pytorch_training.tar.gz \
+# && rm /sagemaker_pytorch_training.tar.gz
 
-RUN chmod +x /usr/local/bin/start_with_right_hostname.sh
+#RUN chmod +x /usr/local/bin/start_with_right_hostname.sh
 
 RUN curl -o /license.txt https://aws-dlc-licenses.s3.amazonaws.com/pytorch/license.txt
 
 # Starts framework
-ENTRYPOINT ["bash", "-m", "start_with_right_hostname.sh"]
+#ENTRYPOINT ["bash", "-m", "start_with_right_hostname.sh"]
 CMD ["/bin/bash"]
